@@ -26,46 +26,64 @@ class main(object):
         self.slidersFrame=None
 
         self.Nf=3
-        self.Nperiods=3
+        self.Nperiods=3.
+
+        self.bovenkant=Frame(self.top,padx=10,pady=10,borderwidth=2,relief='groove')
         
-        #Creating the plotframe    
-        self.plotframe=Frame(self.top,padx=10,pady=10,borderwidth=2,relief='groove')
+        #Creating the plotframe
+
+        self.bovenkant.grid(row=0,column=0)
+        self.plotframe=Frame(self.bovenkant,padx=10,pady=10,borderwidth=2,relief='groove')
+        self.plotframe.grid(row=0,column=0)
         fig=figure(figsize=(8,3))
-        self.canvas = FigureCanvasTkAgg(fig, master=self.top)
+        self.canvas = FigureCanvasTkAgg(fig, master=self.plotframe)
         self.canvas.draw()
         self.canvas.show()
         self.canvas.get_tk_widget().grid(row=0,column=0,sticky=NSEW)
         self.ax=fig.add_subplot(111)
 
         #Creating side options:
-        self.optionsFrame=Frame(self.top,padx=10,pady=10,borderwidth=2,relief='groove')
+        self.optionsFrame=LabelFrame(self.bovenkant,text='Options',padx=10,pady=10,borderwidth=2,relief='groove')
         self.optionsFrame.grid(column=1,row=0)
+
+
         Label(self.optionsFrame,text='Nf:').grid(column=0,row=0)
-        Label(self.optionsFrame,text='Type').grid(column=0,row=1)
-        
         self.Nfentry=Spinbox(self.optionsFrame,width=2,values=tuple(range(1,10)))
-        for i in range(self.Nf-1):
-            self.Nfentry.invoke('buttonup')
         self.Nfentry.grid(row=0,column=1)
-            
+
+
+        self.Periods=Entry(self.optionsFrame,width=6)
+        Label(self.optionsFrame,text='Number of periods to plot:').grid(row=1,column=0)
+        self.Periods.insert(0,str(self.Nperiods))
+        self.Periods.grid(row=1,column=1)
+        
+        #Option to switch to amplitude-phase
+        self.typeFrame=Frame(self.optionsFrame,padx=10,pady=10,borderwidth=2,relief='groove')
+        self.typeFrame.grid(row=3,column=0,columnspan=2)
+
+        Label(self.typeFrame,text='Type').grid(column=0,row=0)
         self.inputtype=StringVar()
-        Type1=Radiobutton(self.optionsFrame,value='RI',variable=self.inputtype)
-        Type1.grid(row=2,column=0)
-        Label(self.optionsFrame,text='Real and imaginary part').grid(row=2,column=1)
-        Type2=Radiobutton(self.optionsFrame,value='AP',variable=self.inputtype)
-        Type2.grid(row=3,column=0)
-        Label(self.optionsFrame,text='Amplitude and phase').grid(row=3,column=1)
-        self.inputtype.set('RI')
+        Type1=Radiobutton(self.typeFrame,value='RI',variable=self.inputtype)
+        Type1.grid(row=1,column=0)
+        Label(self.typeFrame,text='Real and imaginary part').grid(row=1,column=1)
+        Type2=Radiobutton(self.typeFrame,value='AP',variable=self.inputtype)
+        Type2.grid(row=2,column=0)
+        Label(self.typeFrame,text='Amplitude and phase').grid(row=2,column=1)
+
+
         self.updateButton=Button(self.optionsFrame,text='Update',command=self.update)
         self.updateButton.grid(row=10,column=0)
-        # self.
+
+
+        self.inputtype.set('RI')        
+        for i in range(self.Nf-1):
+            self.Nfentry.invoke('buttonup')
+
         self.update(self)        
-        
-
-
         self.draw()
         tk.mainloop()
     def update(self,event=None):
+        self.Nperiods=float(self.Periods.get())
         if self.inputtype.get()=='RI':
             self.setscalars(int(self.Nfentry.get()),'RI')
         else:
@@ -77,7 +95,7 @@ class main(object):
         if self.slidersFrame is not None:
             self.slidersFrame.destroy()
         self.slidersFrame=Frame(self.top,padx=10,pady=10,borderwidth=2,relief='groove')
-        self.slidersFrame.grid(row=1,column=0)        
+        self.slidersFrame.grid(row=1,column=0,sticky=W)        
 
         Ns=2*Nf+1
         self.scales=[]
